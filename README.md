@@ -97,8 +97,6 @@ def rem_bg(pth_, model):
     image.putalpha(alpha)
     return image
 ```
-
-    Using cache found in C:\Users\germa.ADMINHOST/.cache\torch\hub\PeterL1n_RobustVideoMatting_master
     
 
 ## 5. Веб-интерфейс
