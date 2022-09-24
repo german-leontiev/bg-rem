@@ -1,3 +1,13 @@
+# Запуск приложения
+
+```commandline
+conda create -n bg-rem -f environment.yml
+conda activete bg-rem
+uvicorn app:app
+http://127.0.0.1:5003/
+```
+
+
 # Реализация приложения для удаления фона изображения
 
 ## 1. Существующие подходы и выбор архитектуры
