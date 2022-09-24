@@ -1,3 +1,4 @@
+#TODO: specify small size
 FROM python
 
 WORKDIR /usr/src
