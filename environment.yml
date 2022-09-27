@@ -1,0 +1,54 @@
+name: bg-rem
+channels:
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - _openmp_mutex=5.1=1_gnu
+  - ca-certificates=2022.07.19=h06a4308_0
+  - ld_impl_linux-64=2.38=h1181459_1
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=11.2.0=h1234567_1
+  - libgomp=11.2.0=h1234567_1
+  - libstdcxx-ng=11.2.0=h1234567_1
+  - ncurses=6.3=h5eee18b_3
+  - openssl=1.1.1q=h7f8727e_0
+  - pip=22.1.2=py38h06a4308_0
+  - python=3.8.13=h12debd9_0
+  - readline=8.1.2=h7f8727e_1
+  - setuptools=63.4.1=py38h06a4308_0
+  - sqlite=3.39.2=h5082296_0
+  - tk=8.6.12=h1ccaba5_0
+  - wheel=0.37.1=pyhd3eb1b0_0
+  - xz=5.2.5=h7f8727e_1
+  - zlib=1.2.12=h5eee18b_3
+  - pip:
+    - black==22.8.0
+    - certifi==2021.10.8
+    - charset-normalizer==2.0.12
+    - click==8.1.3
+    - colorama==0.4.4
+    - flask==2.1.1
+    - h11==0.13.0
+    - idna==3.3
+    - importlib-metadata==4.11.3
+    - itsdangerous==2.1.2
+    - jinja2==3.1.2
+    - markupsafe==2.1.1
+    - mypy-extensions==0.4.3
+    - numpy==1.22.3
+    - pathspec==0.10.1
+    - pillow==9.1.0
+    - platformdirs==2.5.2
+    - redis==3.4.1
+    - requests==2.27.1
+    - rq==1.2.2
+    - tomli==2.0.1
+    - torch==1.11.0
+    - torchaudio==0.11.0
+    - torchvision==0.12.0
+    - typing-extensions==4.2.0
+    - urllib3==1.26.9
+    - uvicorn==0.18.3
+    - werkzeug==2.1.2
+    - zipp==3.8.0
+prefix: /home/user/miniconda3/envs/bg-rem
