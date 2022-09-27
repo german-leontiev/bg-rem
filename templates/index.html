@@ -24,7 +24,14 @@
     <form class="form-signin" method=post enctype=multipart/form-data>
         
         {% if predicted %}
-            <img  class="mb-4" src="/static/result.png" alt="" width="72">
+            <!-- START IMAGE COMPARISON SLIDER -->
+              <div class="image-spliter mb-4" width="300">
+                <div class="mover"></div>
+                <img class="img-left" src="/static/left.jpg">
+                <img class="img-right" src="/static/right.jpg">
+              </div>
+              <script src="/static/image-comparison-slider.js"></script>
+              <!-- END IMAGE COMPARISON SLIDER -->
         {% else %}
             <img class="mb-4" src="/static/pytorch.png" alt="" width="72">
         {% endif %}
