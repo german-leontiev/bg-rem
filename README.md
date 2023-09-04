@@ -1,4 +1,4 @@
-# Запуск приложения
+# Launching the app
 
 ```commandline
 conda create -n bg-rem -f environment.yml
@@ -8,59 +8,59 @@ http://127.0.0.1:5003/
 ```
 
 
-# Реализация приложения для удаления фона изображения
+# Application implementation to remove image background
 
-## 1. Существующие подходы и выбор архитектуры
+## 1. Existing approaches and architecture choices
 
-Удаление фона является одной из задач компьютерного зрения.<br>
-В научных статьях её можно найти по ключевым словам "Foreground Segmentation", "Background Subtraction" или "Image Matting".<br>
-Один из первых подходов был описан ещё в 90-х годах [прошлого века](#source_1) и основывался на представлении изображения, как графа, состоящего не из пикселей, а из узлов, каждый из которых относился либо к фону, либо к объекту.<br>
+Background removal is one of the tasks of computer vision.<br>
+In scientific articles, it can be found by the keywords "Foreground Segmentation", "Background Subtraction" or "Image Matting".<br>
+One of the first approaches was described back in the 90s [of the last century](#source_1) and was based on the representation of an image as a graph consisting not of pixels, but of nodes, each of which belonged either to the background or to an object.<br>
 
-В последствии появились и другие методы сегментации фона, но всех их объединяло то, что граница объекта была слишком грубой и упускала часть пикселей, кринадлежащих фону, или захватывала часть от объекта. <br>
-Для уточнения границы объекта стали использовать подход, который называется "matting". Подробно метод уточнения границы описан, например, в [статье 2013](#source_2) года. <br>
-В общих чертах, выделяется обрамление (trimap), в рамках которого каждый пиксель представляется в качестве совокупности фона и объекта, затем скользящее окно, как при свёртке в CNN проходится по обрамлению и в зависимости от значения, полученного при этой операции, пиксель классифицируется либо как фон, либо как объект.<br>
-На изображении видно, как "уточнение границы" убирает артефакты после первого прохода сегментационного алгоритма: 
-
-
-Поскольку после успеха AlexNet в 2012, свёрточные нейросети получили заслуженное внимание и в 10-х годах появилось множество архитектур для решения самых разных задач компьютерного зрения, проблема отделения объекта от фона получила качественно новое решение.<br>
-Так в 2017 году на свет появилось исследование компании Adobe, под названием ["Deep Image Matting"](#source_3), в которой тот самый подход "уточнения границ" был реализован на основании deep learning методов. <br>
-Новый matting использовал нейросеть, состоящую из 2-х стадий:
-1. Encode-Decoder стадия использовалась для получения groundtrooth (и сама по себе давала лучшие результаты, чем предыдущий подход)
-2. Вторая стадия нужна для уточнения  результатов.
+Later, other methods of background segmentation appeared, but they were all united by the fact that the border of the object was too rough and missed part of the pixels belonging to the background, or captured part of the object. <br>
+To clarify the boundaries of the object, they began to use an approach called "matting". The method of border refinement is described in detail, for example, in [article 2013](#source_2) of the year. <br>
+In general, there is a frame (trimap), in which each pixel is represented as a combination of background and object, then a sliding window, as when convolving in CNN, passes through the frame and, depending on the value obtained during this operation, the pixel is classified either as a background or as an object.<br>
+The image shows how the "border refinement" removes artifacts after the first pass of the segmentation algorithm:
 
 
-Среди последних работ следует отметить работу [2021 года](#source_4). <br>
-Авторы статьи использовали рекуррентную нейронную сеть, что позволило им удалять фон не только из изображений, но и из видео. <br>
-Кадры при подаче в нейронную сеть сжимается, а после прохождения сложных рекурентных слоёв, groundtrooth восстанавливается до исходного разрешения и уточняется. Это позволяет обрабатывать видео большого разрешения, используя минимум вычислительных мощностей. <br>
-Результат (по заявлениям авторов) - обработка 4К видео (70 FPS) в режиме реального времени на GPU
-
-Для реализации приложения, удаляющего фон с картинки, я буду использовать именно эту модель. <br>
-
-## 2. Датасеты для задачи выделения вона:
+Since after the success of AlexNet in 2012, convolutional neural networks received well-deserved attention and in the 10s, many architectures appeared to solve a variety of computer vision problems, the problem of separating an object from the background received a qualitatively new solution.<br>
+So in 2017, a study by Adobe was born, called ["Deep Image Matting"](#source_3), in which the very approach of "clarifying boundaries" was implemented based on deep learning methods. <br>
+The new matting used a neural network consisting of 2 stages:
+1. Encode-Decoder stage was used to get groundtrooth (and by itself gave better results than the previous approach)
+2. The second stage is needed to clarify the results.
 
 
-* [AM-2k](https://github.com/JizhiziLi/GFM#am-2k) - две тысячи изображений животных в высоком разрешении
-* [AIM-500](https://github.com/JizhiziLi/AIM#aim-500) - датасет с фотографиями, полученными в естественных условиях и размеченными вручную. Состоит из 500 изображений.
-* [P3M-10k](https://github.com/JizhiziLi/P3M#ppt-setting-and-p3m-10k-dataset) - датасет из 10 тысяч фотографий людей, полученных в естественных условиях.
-* [PPM-100](https://github.com/ZHKKKe/PPM#download) - 100 портретов, полученных из Flickr.
-* [Distinctions-646](https://github.com/vietnamican/HAttMatting) - Датасет, состоящий из 646 изображений, размеченных вручную
-* [AISegment.com - Matting Human Datasets](https://www.kaggle.com/datasets/laurentmih/aisegmentcom-matting-human-datasets?resource=download) - датасет из более чем 34 тысяч изображений людей.
-* [BG-20k](https://github.com/JizhiziLi/GFM#bg-20k) - 20 тысяч фоновых изображений, для создания синтетических данных
+Among the latest works, the work of [2021](#source_4) should be noted. <br>
+The authors of the article used a recurrent neural network, which allowed them to remove the background not only from images, but also from videos. <br>
+Frames are compressed when fed into the neural network, and after passing through complex recurrent layers, the groundtrooth is restored to the original resolution and refined. This allows you to process high-resolution video using a minimum of computing power. <br>
+The result (according to the authors) is 4K video processing (70 FPS) in real time on the GPU
 
-## 3. Работа с данными
+To implement an application that removes the background from the picture, I will use this model. <br>
 
-Поскольку авторам выбранной модели удалось не только собрать датасеты, не находящиеся в публичном доступе (Distinctions-646 и Adobe Image Matting), но и обучить свою сеть на внушительных вычислительных мощностях (`48 CPU cores, 300G CPU memory, and 4 Nvidia V100 32G GPUs`), я считаю целесообразным использовать их веса для решения задачи. <br>
+## 2. Datasets for the task of allocating won:
 
-Если требуется демонстрация работы с данными, у меня есть комбинированный датасет лесных для сегментации, локализации и классификации кадров, снятых с дрона. Такие съёмки используются для отслеживания и предупреждения распространения лесных пожаров.
 
-Про то каким образом я объединял данные в один датасет можно почитать тут: [описание](https://github.com/german-leontiev/uwf_data/blob/main/notebook.ipynb)<br>
-Репозиторий с кодом для работы с датасетом находится со ссылке: [uwf_data](https://github.com/german-leontiev/uwf_data)
+* [AM-2k](https://github.com/JizhiziLi/GFM#am-2k ) - two thousand images of animals in high resolution
+* [AIM-500](https://github.com/JizhiziLi/AIM#aim-500 ) - a dataset with photos taken in natural conditions and marked up manually. It consists of 500 images.
+* [P3M-10k](https://github.com/JizhiziLi/P3M#ppt-setting-and-p3m-10k-dataset ) - a dataset of 10 thousand photos of people obtained in vivo.
+* [PPM-100](https://github.com/ZHKKKe/PPM#download ) - 100 portraits obtained from Flickr.
+* [Distinctions-646](https://github.com/vietnamican/HAttMatting ) - Dataset consisting of 646 images marked up manually
+* [AISegment.com - Matting Human Datasets](https://www.kaggle.com/datasets/laurentmih/aisegmentcom-matting-human-datasets?resource=download ) - a dataset of more than 34 thousand images of people.
+* [BG-20k](https://github.com/JizhiziLi/GFM#bg-20k ) - 20 thousand background images to create synthetic data
 
-Там в том числе реализован алгоритм разделения данных на тестовую и валидационную выборки
+## 3. Working with data
 
-## 4. Модель для приложения
+Since the authors of the chosen model managed not only to collect datasets that are not publicly available (Distinctions-646 and Adobe Image Matting), but also to train their network with impressive computing power (`48 CPU cores, 300G CPU memory, and 4 Nvidia V100 32G GPUs`), I consider it appropriate to use their weights for solutions to the problem. <br>
 
-Для инференса нужно написать простой скрипт. При этом учтём, что на сервере не будет CUDA:
+If a demonstration of working with data is required, I have a combined dataset for segmentation, localization and classification of frames taken from a drone. Such surveys are used to track and prevent the spread of forest fires.
+
+You can read about how I combined the data into one dataset here: [description](https://github.com/german-leontiev/uwf_data/blob/main/notebook.ipynb )<br>
+The repository with the code for working with the dataset is located at the link: [uwf_data](https://github.com/german-leontiev/uwf_data )
+
+Among other things, an algorithm for dividing data into test and validation samples is implemented there
+
+## 4. Model for the application
+
+For interest, you need to write a simple script. At the same time, take into account that there will be no CUDA on the server:
 
 
 ```python
@@ -88,11 +88,10 @@ def predict(pth_, model):
 
 
 
-## 5. Веб-интерфейс
-Готовый сервис находится [на моём сайте](https://bg-removal.german-leontiev.ml). *Скорость работы зависит от размера изображения.*<br>
-Код, который я использовал для написания интерфейса находится в [на github](https://github.com/german-leontiev/bg-removal)
+##5. Web interface
+The code I used to write the interface is in [on github](https://github.com/german-leontiev/bg-removal )
 
-## 6. Список источников:
+## 6. List of sources:
 <a id='source_1'></a>
 1. [J. Shi, S. Belongie, T. Leung and J. Malik, "Image and video segmentation: the normalized cut framework," Proceedings 1998 International Conference on Image Processing. ICIP98 (Cat. No.98CB36269), 1998, pp. 943-947 vol.1, doi: 10.1109/ICIP.1998.723676.](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.128.5631&rep=rep1&type=pdf)
 <a id='source_2'></a>
